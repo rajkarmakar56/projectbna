@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flat Owners</title>
+  <style>
+    :root{--blue:#3a86ff;--muted:#666}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:Arial;
+      position:relative;
+      min-height:100%;
+      /* Light background image with semi-transparent white overlay */
+      background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('BNA_1.jpg');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-color: #f2f4f8;
+    }
+    /* ensure content appears above background */
+    .topbar, .container, .modal{position:relative;z-index:1}
+    .topbar{background:var(--blue);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:12px}
+    .topbar h1{font-size:16px;margin:0}
+    .container{padding:12px}
+    .list{background:#fff;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.06);overflow:auto;max-height:70vh}
+    .row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #eee}
+    .row:last-child{border-bottom:0}
+    .left{display:flex;flex-direction:column}
+    .name{font-weight:700}
+    .meta{color:var(--muted);font-size:13px;margin-top:6px}
+    .actions{display:flex;gap:10px;align-items:center}
+    .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#fff;color:#3a86ff;border:1px solid #f0f0f0;box-shadow:0 2px 6px rgba(0,0,0,.06);font-weight:700}
+    .pill{background:#f6f8fb;padding:6px 8px;border-radius:6px;font-size:13px;color:#222}
+    a.icon{color:var(--blue);text-decoration:none;font-size:16px}
+    .small{font-size:12px;color:var(--muted)}
+    .empty{padding:20px;text-align:center;color:var(--muted)}
+    .back{margin-left:auto;color:#fff;text-decoration:none;font-size:14px}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Flat Owners</h1>
+    <button id="addBtn" title="Add Owner" style="margin-left:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#ffd166;color:#000;font-weight:700">Add Owner</button>
+    <button id="addExpenseBtn" title="Add Expences" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#ffb703;color:#000;font-weight:700">Add Expences</button>
+    <button id="viewBalanceBtn" title="View Balance" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#8ecae6;color:#023047;color:#fff;font-weight:700">View Balance</button>
+    <a class="back" id="logoutBtn" href="#" style="cursor:pointer">← Logout</a>
+  </div>
+
+  <div class="container">
+    <div id="list" class="list">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Add Flat Owner Modal -->
+  <div id="addModal" class="modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <h3>Add Flat Owner</h3>
+      <form id="addForm">
+        <label>Name (required)<input id="nameInput" required></label>
+        <label>Flat (required)<input id="flatInput" required></label>
+        <label>Contact (required)<input id="contactInput" required></label>
+        <label>Maintenance (required)<input id="maintenanceInput" required type="number" min="0"></label>
+        <label>Due (required)<input id="dueInput" required type="number" min="0"></label>
+        <div class="form-row">
+          <div class="err" id="formErr" style="color:red;font-size:13px"></div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button type="button" id="cancelAdd">Cancel</button>
+            <button type="submit" id="submitAdd" style="background:#2a9d8f;color:#fff;border:none;padding:8px 12px;border-radius:6px">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <h3 style="margin-top:0;color:#222">Record Payment</h3>
+      <form id="paymentForm">
+        <div style="padding:14px;background:linear-gradient(135deg,#f0f4ff,#f8f9fb);border-radius:8px;margin-bottom:16px;border-left:4px solid #3a86ff">
+          <div style="font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Name</div>
+          <div id="paymentName" style="font-weight:700;margin-top:4px;font-size:15px;color:#222"></div>
+          <div style="font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-top:10px">Monthly Maintenance</div>
+          <div id="paymentMaintenance" style="font-weight:700;margin-top:4px;font-size:15px;color:#222">₹ 0</div>
+          <div style="font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-top:10px">Total Due</div>
+          <div id="paymentDue" style="font-weight:700;margin-top:4px;font-size:15px;color:#222">₹ 0</div>
+        </div>
+        <label style="display:block;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Payment Type (required)</div>
+          <select id="paymentType" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+            <option value="">Select...</option>
+            <option value="Cash">Cash</option>
+            <option value="Online">Online</option>
+          </select>
+        </label>
+        <label style="display:block;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Date (required)</div>
+          <input id="paymentDate" type="date" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <label style="display:block;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Amount Received (required)</div>
+          <input id="amountReceived" type="number" min="0" step="1" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <label id="txnIdLabel" style="display:none;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Transaction ID (required for Online)</div>
+          <input id="paymentTxnId" type="text" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <div class="form-row" style="margin-top:18px;display:flex;align-items:center;justify-content:flex-end;gap:10px">
+          <div class="err" id="paymentErr" style="color:#e63946;font-size:13px;margin-right:auto"></div>
+          <button type="button" id="cancelPayment" style="padding:10px 16px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-weight:600">Cancel</button>
+          <button type="submit" id="submitPayment" style="background:linear-gradient(135deg,#2a9d8f,#1a7a70);color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Expense Modal -->
+  <div id="expenseModal" class="modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <h3 style="margin-top:0;color:#222">Add Expense</h3>
+      <form id="expenseForm">
+        <label style="display:block;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Expense Summary (required)</div>
+          <input id="expenseSummary" type="text" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <label style="display:block;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Date (required)</div>
+          <input id="expenseDate" type="date" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <label style="display:block;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Cash</div>
+          <input id="expenseCash" type="number" min="0" step="1" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <label style="display:block;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Online</div>
+          <input id="expenseOnline" type="number" min="0" step="1" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px">
+        </label>
+        <div class="form-row" style="margin-top:18px;display:flex;align-items:center;justify-content:flex-end;gap:10px">
+          <div class="err" id="expenseErr" style="color:#e63946;font-size:13px;margin-right:auto"></div>
+          <button type="button" id="cancelExpense" style="padding:10px 16px;border:1px solid #ddd;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-weight:600">Cancel</button>
+          <button type="submit" id="submitExpense" style="background:linear-gradient(135deg,#ef476f,#d62828);color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Balance Modal -->
+  <div id="balanceModal" class="modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <h3 style="margin-top:0;color:#222">Balance</h3>
+      <div style="padding:12px;background:#fff;border-radius:6px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total Cash</div><div id="totalCash">₹ 0</div></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total in Bank</div><div id="totalBank">₹ 0</div></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total Due</div><div id="totalDue">₹ 0</div></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <button id="fineBtn" style="padding:8px 12px;border-radius:6px;border:none;background:#ef476f;color:#fff;cursor:pointer;font-weight:600">Apply Fine</button>
+        <button id="maintenanceBtn" style="padding:8px 12px;border-radius:6px;border:none;background:#06d6a0;color:#034;cursor:pointer;font-weight:600">Add Maintenance</button>
+        <button id="exportReportBtn" style="padding:8px 12px;border-radius:6px;border:1px solid #ddd;background:#fff">Extract CSV Report</button>
+        <button id="closeBalance" style="padding:8px 12px;border-radius:6px;border:none;background:#2a9d8f;color:#fff">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;padding:20px}
+    .modal.open{display:flex}
+    .modal-dialog{background:#fff;padding:18px;border-radius:8px;min-width:320px;max-width:480px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal-dialog h3{margin-top:0}
+    .modal-dialog label{display:block;margin:8px 0;font-size:13px}
+    .modal-dialog input{width:100%;padding:8px;margin-top:6px;box-sizing:border-box}
+    .form-row{display:flex;align-items:center;margin-top:10px}
+  </style>
+
+  <script type="module" src="./info.js"></script>
+</body>
+</html>
