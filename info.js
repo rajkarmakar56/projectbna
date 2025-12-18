@@ -278,9 +278,9 @@ function render(items){
     const contact = it.contact || '';
 
     const dueNum = Number(due) || 0;
-    const smsMsg = dueNum < 1 
-      ? 'Thanks no maintenance remaining' 
-      : `You have pending remaining maintenance of ₹${dueNum}`;
+    const smsMsg = dueNum < 1
+      ? `** Reminder from BNA(BLOCK-A) **\nThank you. You have no pending maintenance dues.`
+      : `** Reminder from BNA(BLOCK-A) **\nYou have pending maintenance dues of ₹${dueNum}. Please clear them at the earliest possible.`;
     const smsEncoded = encodeURIComponent(smsMsg);
 
     return `
