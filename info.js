@@ -132,7 +132,13 @@ function initTopbar(){
     // 3. Add CREDIT History (Payments)
     csv += "=== CREDIT HISTORY (PAYMENTS) ===\n";
     csv += "Date,Flat,Name,Cash,Online,TxnID\n";
-    Object.values(credits).reverse().forEach(c => {
+   Object.values(credits)
+  .sort((a, b) => {
+    const da = a.date?.split('/').reverse().join('-');
+    const db = b.date?.split('/').reverse().join('-');
+    return new Date(db) - new Date(da);
+  })
+  .forEach(c => { 
       csv += `${c.date},${c.flatno},"${c.name}",${c.cash || 0},${c.online || 0},${c.txnid || '-'}\n`;
     });
     csv += "\n";
@@ -140,7 +146,13 @@ function initTopbar(){
     // 4. Add DEBIT History (Expenses)
     csv += "=== DEBIT HISTORY (EXPENSES) ===\n";
     csv += "Date,Summary,Cash,Online\n";
-    Object.values(debits).reverse().forEach(d => {
+    Object.values(debits)
+  .sort((a, b) => {
+    const da = a.date?.split('/').reverse().join('-');
+    const db = b.date?.split('/').reverse().join('-');
+    return new Date(db) - new Date(da);
+  })
+  .forEach(d => {
       csv += `${d.date},"${d.summary}",${d.cash || 0},${d.online || 0}\n`;
     });
     csv += "\n";
@@ -178,13 +190,15 @@ function initTopbar(){
       if (expenseErr) expenseErr.textContent = '';
       const summary = document.getElementById('expenseSummary')?.value?.trim();
       const dateVal = document.getElementById('expenseDate')?.value?.trim();
-      const cash = document.getElementById('expenseCash')?.value?.trim() || '';
-      const online = document.getElementById('expenseOnline')?.value?.trim() || '';
+      const paymentType = document.getElementById('expensePaymentType')?.value;
+      const amount = document.getElementById('expenseAmount')?.value?.trim();
 
-      if (!summary || !dateVal) {
-        if (expenseErr) expenseErr.textContent = 'Please enter summary and date.';
-        return;
-      }
+
+    if (!summary || !dateVal || !paymentType || !amount) {
+      expenseErr.textContent = 'All fields are mandatory.';
+      return;
+    }
+
 
       try {
         const submitBtn = document.getElementById('submitExpense');
@@ -205,11 +219,17 @@ function initTopbar(){
         const dateOut = p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : dateVal;
 
         const payload = {
-          cash: String(Number(cash) || ''),
           date: dateOut,
-          online: String(Number(online) || ''),
-          summary: summary
+          summary: summary,
+          cash: '',
+          online: ''
         };
+
+        if (paymentType === 'Cash') {
+          payload.cash = String(Number(amount));
+        } else {
+          payload.online = String(Number(amount));
+        }
 
         await set(ref(db, `debit/${nextKey}`), payload);
         if (submitBtn) submitBtn.disabled = false;
@@ -630,4 +650,104 @@ function renderHistoryTable(tbodyId, data, columns) {
 
     tbody.appendChild(tr);
   });
+}
+
+// restored ORIGINAL SORTING LOGIC FOR UPDATE OWNER
+const updateBtn = document.getElementById('updateUserBtn');
+const updateModal = document.getElementById('updateModal');
+const flatSelect = document.getElementById('updateFlatSelect');
+
+if (updateBtn) {
+updateBtn.onclick = async () => {
+   clearUpdateForm();
+  flatSelect.innerHTML = '<option value="">Select Flat</option>';
+  const snap = await get(ref(db, 'flatowners'));
+  const owners = snap.val() || {};
+
+  // Restored: Sort using localeCompare for natural flat numbering
+  const sorted = Object.entries(owners).sort((a, b) => {
+    return a[1].flat.localeCompare(b[1].flat, undefined, { numeric: true });
+  });
+
+  for (let [key, owner] of sorted) {
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = owner.flat;
+    flatSelect.appendChild(opt);
+  }
+  updateModal.classList.add('open');
+};
+}
+
+flatSelect.onchange = async () => {
+  const key = flatSelect.value; if(!key) return;
+  const o = (await get(ref(db, 'flatowners/' + key))).val();
+  document.getElementById('updateName').value = o.name;
+  document.getElementById('updateFlat').value = o.flat;
+  document.getElementById('updateContact').value = o.contact;
+  document.getElementById('updateMaintenance').value = o.maintenance;
+  document.getElementById('updateDue').value = o.due;
+};
+
+document.getElementById('saveUpdate').onclick = async () => {
+  const key = flatSelect.value; if(!key) return;
+  await set(ref(db, 'flatowners/' + key), {
+    name: document.getElementById('updateName').value,
+    flat: document.getElementById('updateFlat').value,
+    contact: document.getElementById('updateContact').value,
+    maintenance: Number(document.getElementById('updateMaintenance').value),
+    due: Number(document.getElementById('updateDue').value)
+  });
+  updateModal.classList.remove('open');
+};
+
+const saveUpdateBtn = document.getElementById('saveUpdate');
+
+if (saveUpdateBtn) {
+  saveUpdateBtn.addEventListener('click', async (e) => {
+    e.preventDefault(); // ⬅️ THIS FIXES IT
+
+    const key = flatSelect.value;
+    if (!key) {
+      alert('Please select a flat');
+      return;
+    }
+
+    await set(ref(db, 'flatowners/' + key), {
+      name: document.getElementById('updateName').value.trim(),
+      flat: document.getElementById('updateFlat').value.trim(),
+      contact: document.getElementById('updateContact').value.trim(),
+      maintenance: Number(document.getElementById('updateMaintenance').value) || 0,
+      due: Number(document.getElementById('updateDue').value) || 0
+    });
+
+    updateModal.classList.remove('open');
+  });
+}
+
+const cancelUpdate = document.getElementById('cancelUpdate');
+if (cancelUpdate) {
+  cancelUpdate.onclick = () => updateModal.classList.remove('open');
+}
+
+flatSelect.onchange = async () => {
+  const key = flatSelect.value;
+  if (!key) return;
+
+  const snap = await get(ref(db, 'flatowners/' + key));
+  const o = snap.val();
+  if (!o) return;
+
+  document.getElementById('updateName').value = o.name || '';
+  document.getElementById('updateFlat').value = o.flat || '';
+  document.getElementById('updateContact').value = o.contact || '';
+  document.getElementById('updateMaintenance').value = o.maintenance || 0;
+  document.getElementById('updateDue').value = o.due || 0;
+};
+
+function clearUpdateForm() {
+  document.getElementById('updateName').value = '';
+  document.getElementById('updateFlat').value = '';
+  document.getElementById('updateContact').value = '';
+  document.getElementById('updateMaintenance').value = '';
+  document.getElementById('updateDue').value = '';
 }

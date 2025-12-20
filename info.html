@@ -130,8 +130,18 @@
       <form id="expenseForm">
         <label><div>Expense Summary</div><input id="expenseSummary" type="text" required></label>
         <label><div>Date</div><input id="expenseDate" type="date" required></label>
-        <label><div>Cash</div><input id="expenseCash" type="number" min="0"></label>
-        <label><div>Online</div><input id="expenseOnline" type="number" min="0"></label>
+        <label>
+          <div>Payment Type</div>
+          <select id="expensePaymentType" required>
+            <option value="">Select</option>
+            <option value="Cash">Cash</option>
+            <option value="Online">Online</option>
+          </select>
+        </label>
+        <label>
+          <div>Amount</div>
+          <input id="expenseAmount" type="number" min="1" required>
+        </label>
         <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px">
           <div class="err" id="expenseErr" style="color:red;font-size:13px;margin-right:auto"></div>
           <button type="button" id="cancelExpense" style="padding:10px 16px;border:1px solid #ddd;border-radius:6px;background:#fff">Cancel</button>
