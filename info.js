@@ -62,17 +62,82 @@ function initTopbar(){
     balanceModal.classList.add('open');
   });
 
-  // Export CSV Report
-  document.getElementById('exportReportBtn').onclick = async () => {
-    const c = (await get(ref(db, 'credit'))).val() || {};
-    const d = (await get(ref(db, 'debit'))).val() || {};
-    let csv = "Type,Date,Flat/Summary,Name,Cash,Online,TxnID\n";
-    Object.values(c).forEach(i => csv += `Credit,${i.date},${i.flatno},${i.name},${i.cash},${i.online},${i.txnid}\n`);
-    Object.values(d).forEach(i => csv += `Debit,${i.date},${i.summary},-,${i.cash},${i.online},-\n`);
+  exportReportBtn.onclick = async () => {
+  try {
+    const ownersSnap = await get(ref(db, 'flatowners'));
+    const creditSnap = await get(ref(db, 'credit'));
+    const debitSnap = await get(ref(db, 'debit'));
+    
+    const owners = ownersSnap.val() || {};
+    const credits = creditSnap.val() || {};
+    const debits = debitSnap.val() || {};
+
+    // 1. Calculate Totals
+    let cashIn = 0, onlineIn = 0, cashOut = 0, onlineOut = 0, totalDue = 0;
+    
+    Object.values(credits).forEach(c => {
+      cashIn += Number(c.cash) || 0;
+      onlineIn += Number(c.online) || 0;
+    });
+    Object.values(debits).forEach(d => {
+      cashOut += Number(d.cash) || 0;
+      onlineOut += Number(d.online) || 0;
+    });
+    Object.values(owners).forEach(o => {
+      totalDue += Number(o.due) || 0;
+    });
+
+    // 2. Build the CSV Content
+    let csv = "=== TOTAL BALANCE ===\n";
+    csv += "TYPE,AMOUNT\n";
+    csv += `CASH_IN,${cashIn}\n`;
+    csv += `CASH_OUT,${cashOut}\n`;
+    csv += `CASH_LEFT,${cashIn - cashOut}\n`;
+    csv += `ACCOUNT_IN,${onlineIn}\n`;
+    csv += `ACCOUNT_OUT,${onlineOut}\n`;
+    csv += `ACCOUNT_LEFT,${onlineIn - onlineOut}\n`;
+    csv += `TOTAL_DUE,${totalDue}\n\n`;
+
+    // 3. Add CREDIT History (Payments)
+    csv += "=== CREDIT HISTORY (PAYMENTS) ===\n";
+    csv += "Date,Flat,Name,Cash,Online,TxnID\n";
+    Object.values(credits).reverse().forEach(c => {
+      csv += `${c.date},${c.flatno},"${c.name}",${c.cash || 0},${c.online || 0},${c.txnid || '-'}\n`;
+    });
+    csv += "\n";
+
+    // 4. Add DEBIT History (Expenses)
+    csv += "=== DEBIT HISTORY (EXPENSES) ===\n";
+    csv += "Date,Summary,Cash,Online\n";
+    Object.values(debits).reverse().forEach(d => {
+      csv += `${d.date},"${d.summary}",${d.cash || 0},${d.online || 0}\n`;
+    });
+    csv += "\n";
+
+    // 5. Add OWNER STATUS
+    csv += "=== OWNERS CURRENT STATUS ===\n";
+    csv += '"name","flat","contact","maintenance","due"\n';
+    const sortedOwners = Object.values(owners).sort((a, b) => 
+      a.flat.localeCompare(b.flat, undefined, { numeric: true })
+    );
+    sortedOwners.forEach(o => {
+      csv += `"${o.name}","${o.flat}","${o.contact}","${o.maintenance}","${o.due}"\n`;
+    });
+
+    // 6. Download
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'bnareport.csv'; a.click();
-  };
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BNA_Full_Report_${new Date().toLocaleDateString()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+  } catch (e) {
+    console.error("Export Error:", e);
+    alert("Failed to generate complete report");
+  }
+};
 
   document.getElementById('cancelExpense').onclick = () => expenseModal.classList.remove('open');
   document.getElementById('closeBalance').onclick = () => balanceModal.classList.remove('open');
