@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<title>Maintenance Login Portal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Google Fonts for elegant look -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 body{
@@ -12,43 +15,95 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:linear-gradient(135deg,#87ceeb,#4da6d6);
-  font-family:Arial;
+  background: 
+    linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+    url('BNA_1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Montserrat', sans-serif;
 }
+
+/* Login card */
 .card{
-  background:#fff;
-  padding:30px;
-  width:320px;
-  border-radius:16px;
-  box-shadow:0 20px 40px rgba(0,0,0,.2);
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  position:relative;
-  z-index:1;
+  background: rgba(255,255,255,0.95);
+  padding: 45px 35px;
+  width: 360px;
+  border-radius: 22px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  transition: transform 0.3s ease;
 }
-input,button{
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Header styles */
+.card h2{
+  margin-bottom: 5px;
+  color: #1a1a1a;  /* Darker, elegant color */
+  font-size: 26px; /* Large text for BNA */
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.card .subheader{
+  margin-bottom: 20px;
+  color: #667eea; /* Attractive accent color */
+  font-size: 15px; /* Smaller text for portal */
+  font-weight: 600;
+}
+
+/* Inputs and button */
+input, button{
   width:100%;
-  padding:12px;
-  margin:0;
-  box-sizing:border-box;
+  padding: 14px;
+  margin: 0;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
+input:focus{
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 8px rgba(102,126,234,0.5);
+}
+
+/* Button styling */
 button{
-  background:#667eea;
-  color:#fff;
-  border:none;
-  cursor:pointer;
+  background: #667eea;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
-.msg{ text-align:center; min-height:20px; }
-.success{ color:green }
-.error{ color:red }
+button:hover{
+  background: #5566c3;
+  transform: translateY(-2px);
+}
+
+/* Messages */
+.msg{
+  min-height: 22px;
+  margin-top: 5px;
+  font-weight: 500;
+  color: #e74c3c; /* Error color by default */
+}
+.success{ color: green; }
+.error{ color: #e74c3c; }
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h2>BNA (BlockA) Maintenance User Login</h2>
+  <h2>BABA NARAYAN APARTMENT (BLOCK-A)</h2>
+  <p class="subheader">Maintenance Login Portal</p>
   <input id="username" placeholder="Username">
   <input id="password" type="password" placeholder="Password">
   <button onclick="login()">Login</button>

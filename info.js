@@ -90,47 +90,92 @@ function initTopbar(){
 
   if (closeBalance) closeBalance.addEventListener('click', () => { if (balanceModal) balanceModal.classList.remove('open'); });
 
-  if (exportReportBtn) exportReportBtn.addEventListener('click', async () => {
-    try {
-      const creditSnap = await get(ref(db, 'credit'));
-      const debitSnap = await get(ref(db, 'debit'));
-      const ownersSnap = await get(ref(db, 'flatowners'));
-      const credits = creditSnap.val() || {};
-      const debits = debitSnap.val() || {};
-      const owners = ownersSnap.val() || {};
+ if (exportReportBtn) exportReportBtn.addEventListener('click', async () => {
+  try {
+    const creditSnap = await get(ref(db, 'credit'));
+    const debitSnap = await get(ref(db, 'debit'));
+    const ownersSnap = await get(ref(db, 'flatowners'));
 
-      function objToCsv(rows, headers){
-        const line = (arr) => arr.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',');
-        const out = [];
-        out.push(line(headers));
-        for (const k in rows) {
-          const r = rows[k] || {};
-          out.push(line(headers.map(h => r[h] ?? '')));
-        }
-        return out.join('\n');
-      }
+    const credits = creditSnap.val() || {};
+    const debits = debitSnap.val() || {};
+    const owners = ownersSnap.val() || {};
 
-      const parts = [];
-      parts.push('=== CREDIT ===');
-      parts.push(objToCsv(credits, ['cash','date','flatno','name','online','txnid']));
-      parts.push('\n=== DEBIT ===');
-      parts.push(objToCsv(debits, ['cash','date','online','summary']));
-      parts.push('\n=== OWNERS ===');
-      parts.push(objToCsv(owners, ['name','flat','contact','maintenance','due']));
+    let CASH_IN = 0, CASH_OUT = 0;
+    let ACCOUNT_IN = 0, ACCOUNT_OUT = 0;
+    let TOTAL_DUE = 0;
 
-      const blob = new Blob([parts.join('\n\n')], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'bnareport.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
+    // Credits
+    for (const k in credits) {
+      const c = credits[k] || {};
+      CASH_IN += Number(c.cash) || 0;
+      ACCOUNT_IN += Number(c.online) || 0;
     }
-  });
+
+    // Debits
+    for (const k in debits) {
+      const d = debits[k] || {};
+      CASH_OUT += Number(d.cash) || 0;
+      ACCOUNT_OUT += Number(d.online) || 0;
+    }
+
+    // Owners Due
+    for (const k in owners) {
+      const o = owners[k] || {};
+      const due = Number(o.due) || 0;
+      if (due > 0) TOTAL_DUE += due;
+    }
+
+    const CASH_LEFT = CASH_IN - CASH_OUT;
+    const ACCOUNT_LEFT = ACCOUNT_IN - ACCOUNT_OUT;
+
+    function objToCsv(rows, headers) {
+      const line = (arr) => arr.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+      const out = [];
+      out.push(line(headers));
+      for (const k in rows) {
+        const r = rows[k] || {};
+        out.push(line(headers.map(h => r[h] ?? '')));
+      }
+      return out.join('\n');
+    }
+
+    const parts = [];
+
+    parts.push('=== TOTAL BALANCE ===');
+    parts.push('TYPE,AMOUNT');
+    parts.push(`CASH_IN,${CASH_IN}`);
+    parts.push(`CASH_OUT,${CASH_OUT}`);
+    parts.push(`CASH_LEFT,${CASH_LEFT}`);
+    parts.push(`ACCOUNT_IN,${ACCOUNT_IN}`);
+    parts.push(`ACCOUNT_OUT,${ACCOUNT_OUT}`);
+    parts.push(`ACCOUNT_LEFT,${ACCOUNT_LEFT}`);
+    parts.push(`TOTAL_DUE,${TOTAL_DUE}`);
+
+    parts.push('\n=== OWNERS ===');
+    parts.push(objToCsv(owners, ['name', 'flat', 'contact', 'maintenance', 'due']));
+
+    parts.push('\n=== CREDIT ===');
+    parts.push(objToCsv(credits, ['flatno', 'name', 'date', 'cash', 'online', 'txnid']));
+
+    parts.push('\n=== DEBIT ===');
+    parts.push(objToCsv(debits, ['summary', 'date', 'cash', 'online']));
+
+    const blob = new Blob([parts.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bnareport.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 
   // Expense form submit -> save to debit/debitN
   if (expenseForm) {
@@ -269,7 +314,13 @@ function render(items){
     return;
   }
 
-  const rows = Object.keys(items).map(k => {
+const rows = Object.keys(items)
+  .sort((a, b) => {
+    const dueA = Number(items[a]?.due) || 0;
+    const dueB = Number(items[b]?.due) || 0;
+    return dueB - dueA; // highest due first
+  })
+  .map(k => {
     const it = items[k] || {};
     const name = it.name || it.username || '—';
     const flat = it.flat || '';
@@ -515,3 +566,75 @@ renderEmpty('Loading...');
 onValue(ref(db, 'flatowners'), snap => {
   render(snap.val());
 });
+
+// ========= UPDATE OWNER =========
+
+const updateBtn = document.getElementById('updateUserBtn');
+const updateModal = document.getElementById('updateModal');
+const cancelUpdate = document.getElementById('cancelUpdate');
+const saveUpdate = document.getElementById('saveUpdate');
+const flatSelect = document.getElementById('updateFlatSelect');
+
+let currentOwnerKey = null;
+
+// Open popup
+updateBtn.onclick = async () => {
+  flatSelect.innerHTML = '<option value="">Select Flat</option>';
+
+  const snap = await get(ref(db, 'flatowners'));
+  const owners = snap.val() || {};
+
+const sorted = Object.entries(owners)
+  .sort((a, b) => {
+    return a[1].flat.localeCompare(b[1].flat, undefined, { numeric: true });
+  });
+
+for (let [key, owner] of sorted) {
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = owner.flat;
+  flatSelect.appendChild(opt);
+}
+
+
+  updateModal.classList.add('open');
+};
+
+// Close popup
+cancelUpdate.onclick = () => {
+  updateModal.classList.remove('open');
+};
+
+// Load owner data
+flatSelect.onchange = async () => {
+  currentOwnerKey = flatSelect.value;
+  if (!currentOwnerKey) return;
+
+  const snap = await get(ref(db, 'flatowners/' + currentOwnerKey));
+  const o = snap.val();
+
+  updateName.value = o.name;
+  updateFlat.value = o.flat;
+  updateContact.value = o.contact;
+  updateMaintenance.value = o.maintenance;
+  updateDue.value = o.due;
+};
+
+// Save update
+saveUpdate.onclick = async () => {
+  if (!currentOwnerKey) {
+    alert('Please select flat');
+    return;
+  }
+
+  await set(ref(db, 'flatowners/' + currentOwnerKey), {
+    name: updateName.value,
+    flat: updateFlat.value,
+    contact: updateContact.value,
+    maintenance: Number(updateMaintenance.value),
+    due: Number(updateDue.value)
+  });
+
+  alert('Owner updated successfully');
+  updateModal.classList.remove('open');
+};

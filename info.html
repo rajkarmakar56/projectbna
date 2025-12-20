@@ -41,14 +41,13 @@
 </head>
 <body>
   <div class="topbar">
-    <h1>Flat Owners</h1>
-    <button id="addBtn" title="Add Owner" style="margin-left:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#ffd166;color:#000;font-weight:700">Add Owner</button>
-    <button id="addExpenseBtn" title="Add Expences" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#ffb703;color:#000;font-weight:700">Add Expences</button>
-    <button id="viewBalanceBtn" title="View Balance" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#8ecae6;color:#023047;color:#fff;font-weight:700">View Balance</button>
-    <a class="back" id="logoutBtn" href="#" style="cursor:pointer">← Logout</a>
+    <h1>🏠 Flat Owners</h1>
+    <!-- <button id="addBtn" title="Add Owner" style="margin-left:12px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#ffd166;color:#000;font-weight:700">Add Owner</button> -->
+    <button id="updateUserBtn" title="Update Owner" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#90dbf4;color:#000;font-weight:700">Update Owner</button>
+    <a class="back" id="logoutBtn" href="#" style="cursor:pointer">⏻ Logout</a>
   </div>
 
-  <div class="container">
+  <div class="container" style="padding-bottom:120px">
     <div id="list" class="list">
       <div class="empty">Loading…</div>
     </div>
@@ -75,10 +74,66 @@
     </div>
   </div>
 
+  <!-- Update Owner Popup -->
+<div id="updateModal" class="modal">
+  <div class="modal-dialog" style="max-width:420px">
+  <h3 style="margin-top:0;color:#222">⭐Update Owner</h3>
+
+  <label style="display:block;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">
+      Select Flat No
+    </div>
+    <select id="updateFlatSelect"
+      style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px">
+    </select>
+  </label>
+
+  <label style="display:block;margin-bottom:12px">
+    <div class="small">Name</div>
+    <input id="updateName" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px">
+  </label>
+
+  <label style="display:block;margin-bottom:12px">
+    <div class="small">Flat No</div>
+    <input id="updateFlat" readonly
+      style="width:100%;padding:10px;border:1px solid #eee;border-radius:6px;background:#f6f6f6">
+  </label>
+
+  <label style="display:block;margin-bottom:12px">
+    <div class="small">Contact</div>
+    <input id="updateContact" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px">
+  </label>
+
+  <label style="display:block;margin-bottom:12px">
+    <div class="small">Maintenance</div>
+    <input id="updateMaintenance" type="number"
+      style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px">
+  </label>
+
+  <label style="display:block;margin-bottom:16px">
+    <div class="small">Due</div>
+    <input id="updateDue" type="number"
+      style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px">
+  </label>
+
+  <div style="display:flex;justify-content:flex-end;gap:10px">
+    <button id="cancelUpdate"
+      style="padding:10px 14px;border-radius:6px;border:1px solid #ddd;background:#fff">
+      Cancel
+    </button>
+    <button id="saveUpdate"
+      style="padding:10px 18px;border-radius:6px;border:none;background:#2a9d8f;color:#fff;font-weight:600">
+      Update
+    </button>
+  </div>
+</div>
+</div>
+
+
   <!-- Payment Modal -->
   <div id="paymentModal" class="modal" aria-hidden="true">
     <div class="modal-dialog">
-      <h3 style="margin-top:0;color:#222">Record Payment</h3>
+      <h3 style="margin-top:0;color:#222">📝 Record Payment</h3>
       <form id="paymentForm">
         <div style="padding:14px;background:linear-gradient(135deg,#f0f4ff,#f8f9fb);border-radius:8px;margin-bottom:16px;border-left:4px solid #3a86ff">
           <div style="font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Name</div>
@@ -120,7 +175,7 @@
   <!-- Expense Modal -->
   <div id="expenseModal" class="modal" aria-hidden="true">
     <div class="modal-dialog">
-      <h3 style="margin-top:0;color:#222">Add Expense</h3>
+      <h3 style="margin-top:0;color:#222">🧾Add Expense</h3>
       <form id="expenseForm">
         <label style="display:block;margin-bottom:12px">
           <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:6px">Expense Summary (required)</div>
@@ -150,7 +205,7 @@
   <!-- Balance Modal -->
   <div id="balanceModal" class="modal" aria-hidden="true">
     <div class="modal-dialog">
-      <h3 style="margin-top:0;color:#222">Balance</h3>
+      <h3 style="margin-top:0;color:#222">📊 View Balance</h3>
       <div style="padding:12px;background:#fff;border-radius:6px;margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total Cash</div><div id="totalCash">₹ 0</div></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total in Bank</div><div id="totalBank">₹ 0</div></div>
@@ -173,8 +228,35 @@
     .modal-dialog label{display:block;margin:8px 0;font-size:13px}
     .modal-dialog input{width:100%;padding:8px;margin-top:6px;box-sizing:border-box}
     .form-row{display:flex;align-items:center;margin-top:10px}
+    .bottom-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+  }
+
+  .bottom-bar button {
+    height: 52px;
+    border-radius: 14px;
+    font-size: 15px;
+  }
   </style>
 
   <script type="module" src="./info.js"></script>
+  <!-- Bottom Action Bar -->
+<div class="bottom-bar">
+  <button id="addExpenseBtn"
+    style="flex:1;padding:14px;border:none;background:#ffb703;color:#000;font-weight:700;border-radius:12px">
+    Add Expenses
+  </button>
+
+  <button id="viewBalanceBtn"
+    style="flex:1;padding:14px;border:none;background:#3a86ff;color:#fff;font-weight:700;border-radius:12px">
+    View Balance
+  </button>
+</div>
 </body>
 </html>
