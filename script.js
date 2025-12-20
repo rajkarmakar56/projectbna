@@ -27,7 +27,7 @@ window.login = async () => {
       msgEl.textContent = ok ? 'Login successful ✅' : 'Invalid username or password';
       msgEl.className = 'msg ' + (ok ? 'success' : 'error');
       if (ok) {
-        // show success briefly then navigate to info page
+        // Redirect to info.html after success
         setTimeout(() => { window.location.href = 'info.html'; }, 800);
       }
     }

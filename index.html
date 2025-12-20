@@ -1,196 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Flat Owners</title>
-  <style>
-    :root{--blue:#3a86ff;--muted:#666;--green:#2a9d8f;--red:#ef476f}
-    html,body{height:100%;margin:0}
-    body{
-      font-family:Arial;
-      position:relative;
-      min-height:100%;
-      background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('BNA_1.jpg');
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center center;
-      background-attachment: fixed;
-      background-color: #f2f4f8;
-    }
-    .topbar, .container, .modal{position:relative;z-index:1}
-    .topbar{background:var(--blue);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:12px}
-    .topbar h1{font-size:16px;margin:0}
-    .container{padding:12px}
-    .list{background:#fff;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.06);overflow:auto;max-height:70vh}
-    .row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #eee}
-    .row:last-child{border-bottom:0}
-    .left{display:flex;flex-direction:column}
-    .name{font-weight:700}
-    .meta{color:var(--muted);font-size:13px;margin-top:6px}
-    .actions{display:flex;gap:10px;align-items:center}
-    .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:#fff;color:#3a86ff;border:1px solid #f0f0f0;box-shadow:0 2px 6px rgba(0,0,0,.06);font-weight:700}
-    a.icon{color:var(--blue);text-decoration:none;font-size:16px}
-    .small{font-size:12px;color:var(--muted)}
-    .empty{padding:20px;text-align:center;color:var(--muted)}
-    .back{margin-left:auto;color:#fff;text-decoration:none;font-size:14px}
-    
-    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center;padding:20px;z-index:100}
-    .modal.open{display:flex}
-    .modal-dialog{background:#fff;padding:18px;border-radius:8px;min-width:320px;max-width:480px;box-shadow:0 10px 30px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
-    .modal-dialog.wide{max-width:95%;width:900px}
-    .modal-dialog h3{margin-top:0}
-    .modal-dialog label{display:block;margin:8px 0;font-size:13px}
-    .modal-dialog input, .modal-dialog select{width:100%;padding:8px;margin-top:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:6px}
-    
-    .bottom-bar {position: fixed;bottom: 16px;left: 16px;right: 16px;display: flex;gap: 8px;z-index: 10}
-    .bottom-bar button {flex:1;height: 52px;border-radius: 14px;font-size: 14px;border:none;font-weight:700;cursor:pointer}
+<meta charset="UTF-8">
+<title>Maintenance Login Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-    /* Tabs for History */
-    .tabs{display:flex;gap:4px;margin-bottom:12px;background:#f0f0f0;padding:4px;border-radius:8px}
-    .tab-btn{flex:1;padding:8px;border:none;background:none;cursor:pointer;border-radius:6px;font-weight:600}
-    .tab-btn.active{background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.1);color:var(--blue)}
-    .tab-content{display:none}
-    .tab-content.active{display:block}
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Soft Light Yellow Theme with subtle background image overlay */
+    background: linear-gradient(rgba(255, 249, 215, 0.9), rgba(255, 249, 215, 0.9)), 
+                url('BNA_1.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Montserrat', sans-serif;
+  }
 
-    /* Table Design */
-    .table-wrapper{overflow-x:auto;margin-top:10px;border:1px solid #eee;border-radius:6px}
-    table{width:100%;border-collapse:collapse;font-size:12px;text-align:left}
-    th{background:#f8f9fb;padding:10px;border-bottom:2px solid #eee}
-    td{padding:10px;border-bottom:1px solid #eee}
-  </style>
+  .card {
+    background: #ffffff;
+    padding: 45px 35px;
+    width: 360px;
+    border-radius: 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .card h2 {
+    color: #212121;
+    font-size: 22px;
+    margin: 0 0 5px 0;
+    font-weight: 700;
+  }
+
+  .subheader {
+    color: #2874f0; 
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  input {
+    width: 100%;
+    padding: 14px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+    background: #f9f9f9;
+    transition: border-color 0.3s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #2874f0;
+    background: #fff;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    background: #fb641b; 
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(251, 100, 27, 0.3);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  button:hover {
+    background: #e65a16;
+    box-shadow: 0 6px 15px rgba(251, 100, 27, 0.4);
+  }
+
+  .msg {
+    min-height: 22px;
+    margin-top: 15px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .success { color: #388e3c; }
+  .error { color: #d32f2f; }
+</style>
 </head>
+
 <body>
-  <div class="topbar">
-    <h1>🏠 Flat Owners</h1>
-    <button id="updateUserBtn" title="Update Owner" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#90dbf4;color:#000;font-weight:700">Update Owner</button>
-    <a class="back" id="logoutBtn" href="#" style="cursor:pointer">🔒</a>
+
+<div class="card">
+  <h2>BABA NARAYAN APARTMENT (Block-A)</h2>
+  <p class="subheader">Maintenance Login Portal</p>
+  
+  <div class="input-group">
+    <input id="username" placeholder="Username" autocomplete="off">
+  </div>
+  
+  <div class="input-group">
+    <input id="password" type="password" placeholder="Password">
   </div>
 
-  <div class="container" style="padding-bottom:120px">
-    <div id="list" class="list">
-      <div class="empty">Loading…</div>
-    </div>
-  </div>
+  <button onclick="login()">Login</button>
+  
+  <div id="msg" class="msg"></div>
+</div>
 
-  <div id="updateModal" class="modal">
-    <div class="modal-dialog" style="max-width:420px">
-      <h3 style="margin-top:0;color:#222">⭐Update Owner</h3>
-      <label><div>Select Flat No</div><select id="updateFlatSelect"></select></label>
-      <label><div class="small">Name</div><input id="updateName"></label>
-      <label><div class="small">Flat No</div><input id="updateFlat" readonly style="background:#f6f6f6"></label>
-      <label><div class="small">Contact</div><input id="updateContact"></label>
-      <label><div class="small">Maintenance</div><input id="updateMaintenance" type="number"></label>
-      <label style="margin-bottom:16px"><div class="small">Due</div><input id="updateDue" type="number"></label>
-      <div style="display:flex;justify-content:flex-end;gap:10px">
-        <button id="cancelUpdate" style="padding:10px 14px;border-radius:6px;border:1px solid #ddd;background:#fff">Cancel</button>
-        <button id="saveUpdate" style="padding:10px 18px;border-radius:6px;border:none;background:var(--green);color:#fff;font-weight:600">Update</button>
-      </div>
-    </div>
-  </div>
+<script type="module" src="./script.js"></script>
 
-  <div id="paymentModal" class="modal">
-    <div class="modal-dialog">
-      <h3 style="margin-top:0;color:#222">📝 Record Payment</h3>
-      <form id="paymentForm">
-        <div style="padding:14px;background:linear-gradient(135deg,#f0f4ff,#f8f9fb);border-radius:8px;margin-bottom:16px;border-left:4px solid #3a86ff">
-          <div style="font-size:12px;color:#666;font-weight:600">Name</div>
-          <div id="paymentName" style="font-weight:700;margin-top:4px;font-size:15px"></div>
-          <div style="font-size:12px;color:#666;font-weight:600;margin-top:10px">Total Due</div>
-          <div id="paymentDue" style="font-weight:700;margin-top:4px;font-size:15px">₹ 0</div>
-          <div id="paymentMaintenance" style="display:none"></div>
-        </div>
-        <label><div>Payment Type</div>
-          <select id="paymentType" required>
-            <option value="">Select...</option>
-            <option value="Cash">Cash</option>
-            <option value="Online">Online</option>
-          </select>
-        </label>
-        <label><div>Date</div><input id="paymentDate" type="date" required></label>
-        <label><div>Amount Received</div><input id="amountReceived" type="number" min="0" required></label>
-        <label id="txnIdLabel" style="display:none"><div>Transaction ID</div><input id="paymentTxnId"></label>
-        <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px">
-          <div id="paymentErr" style="color:red;font-size:13px;margin-right:auto"></div>
-          <button type="button" id="cancelPayment" style="padding:10px 16px;border:1px solid #ddd;border-radius:6px;background:#fff">Cancel</button>
-          <button type="submit" id="submitPayment" style="background:var(--green);color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:600">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div id="expenseModal" class="modal">
-    <div class="modal-dialog">
-      <h3 style="margin-top:0;color:#222">🧾Add Expense</h3>
-      <form id="expenseForm">
-        <label><div>Expense Summary</div><input id="expenseSummary" type="text" required></label>
-        <label><div>Date</div><input id="expenseDate" type="date" required></label>
-        <label><div>Cash</div><input id="expenseCash" type="number" min="0"></label>
-        <label><div>Online</div><input id="expenseOnline" type="number" min="0"></label>
-        <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px">
-          <div id="expenseErr" style="color:red;font-size:13px;margin-right:auto"></div>
-          <button type="button" id="cancelExpense" style="padding:10px 16px;border:1px solid #ddd;border-radius:6px;background:#fff">Cancel</button>
-          <button type="submit" id="submitExpense" style="background:var(--red);color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:600">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div id="balanceModal" class="modal">
-    <div class="modal-dialog">
-      <h3 style="margin-top:0;color:#222">📊 View Balance</h3>
-      <div style="padding:12px;background:#f8f9fb;border-radius:6px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total Cash</div><div id="totalCash" style="font-weight:700">₹ 0</div></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total in Bank</div><div id="totalBank" style="font-weight:700">₹ 0</div></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div>Total Due</div><div id="totalDue" style="font-weight:700;color:var(--red)">₹ 0</div></div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
-        <button id="fineBtn" style="padding:8px 12px;border-radius:6px;border:none;background:var(--red);color:#fff;font-weight:600">Apply Fine</button>
-        <button id="maintenanceBtn" style="padding:8px 12px;border-radius:6px;border:none;background:#06d6a0;color:#034;font-weight:600">Add Maintenance</button>
-        <button id="exportReportBtn" style="padding:8px 12px;border-radius:6px;border:1px solid #ddd;background:#fff">Extract CSV</button>
-        <button id="closeBalance" style="padding:8px 12px;border-radius:6px;border:none;background:var(--green);color:#fff">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="historyModal" class="modal">
-    <div class="modal-dialog wide">
-      <h3 style="margin-top:0">📑 Transaction History</h3>
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="creditTab">Credit (Payments)</button>
-        <button class="tab-btn" data-tab="debitTab">Debit (Expenses)</button>
-      </div>
-      
-      <div id="creditTab" class="tab-content active">
-        <div class="table-wrapper">
-          <table>
-            <thead><tr><th>Date</th><th>Flat</th><th>Name</th><th>Cash</th><th>Online</th><th>Txn ID</th></tr></thead>
-            <tbody id="creditTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="debitTab" class="tab-content">
-        <div class="table-wrapper">
-          <table>
-            <thead><tr><th>Date</th><th>Summary</th><th>Cash</th><th>Online</th></tr></thead>
-            <tbody id="debitTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div style="margin-top:16px;text-align:right">
-        <button id="closeHistory" style="padding:10px 20px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-weight:600">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="bottom-bar">
-    <button id="addExpenseBtn" style="background:#ffb703;color:#000">Add Expenses</button>
-    <button id="viewBalanceBtn" style="background:var(--blue);color:#fff">View Balance</button>
-    <button id="viewHistoryBtn" style="background:#833ab4;color:#fff">Txn History</button>
-  </div>
-
-  <script type="module" src="./info.js"></script>
 </body>
 </html>
