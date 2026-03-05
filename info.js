@@ -93,6 +93,105 @@ function initTopbar(){
 
   if (closeBalance) closeBalance.addEventListener('click', () => { if (balanceModal) balanceModal.classList.remove('open'); });
 
+  // Common Message Modal Handling
+  const messageBtn = document.getElementById('messageBtn');
+  const messageModal = document.getElementById('messageModal');
+  const messageText = document.getElementById('messageText');
+  const messageErr = document.getElementById('messageErr');
+  const saveMessage = document.getElementById('saveMessage');
+  const sendMessage = document.getElementById('sendMessage');
+  const cancelMessage = document.getElementById('cancelMessage');
+
+  if (messageBtn) {
+    messageBtn.addEventListener('click', async () => {
+      try {
+        messageErr.textContent = '';
+        // Load message from database
+        const msgSnap = await get(ref(db, 'msg'));
+        const msgValue = msgSnap.val() || '';
+        messageText.value = msgValue;
+        if (messageModal) messageModal.classList.add('open');
+      } catch (e) {
+        console.error('Error loading message:', e);
+        messageErr.textContent = 'Failed to load message';
+      }
+    });
+  }
+
+  if (cancelMessage) {
+    cancelMessage.addEventListener('click', () => {
+      if (messageModal) messageModal.classList.remove('open');
+      messageErr.textContent = '';
+    });
+  }
+
+  if (saveMessage) {
+    saveMessage.addEventListener('click', async () => {
+      try {
+        messageErr.textContent = '';
+        const text = messageText.value.trim();
+        if (!text) {
+          messageErr.textContent = 'Message cannot be empty';
+          return;
+        }
+        await set(ref(db, 'msg'), text);
+        messageErr.textContent = '';
+        alert('Message saved successfully!');
+      } catch (e) {
+        console.error('Error saving message:', e);
+        messageErr.textContent = 'Failed to save message';
+      }
+    });
+  }
+
+  if (sendMessage) {
+    sendMessage.addEventListener('click', async () => {
+      try {
+        messageErr.textContent = '';
+        const text = messageText.value.trim();
+        if (!text) {
+          messageErr.textContent = 'Message cannot be empty';
+          return;
+        }
+
+        // Get all owners with contact numbers
+        const ownersSnap = await get(ref(db, 'flatowners'));
+        const owners = ownersSnap.val() || {};
+        
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const k in owners) {
+          const owner = owners[k] || {};
+          const contact = owner.contact || '';
+          
+          if (contact) {
+            try {
+              // Create SMS link and trigger it
+              const smsEncoded = encodeURIComponent(text);
+              const smsLink = `sms:${contact}?body=${smsEncoded}`;
+              
+              // Open the SMS link in a new tab (will open device's SMS app)
+              window.open(smsLink, '_blank');
+              successCount++;
+            } catch (e) {
+              console.error(`Failed to send to ${owner.name}:`, e);
+              failCount++;
+            }
+          } else {
+            failCount++;
+          }
+        }
+
+        alert(`Message sent to ${successCount} residents with valid contact numbers.\n${failCount} residents have no contact number.`);
+        if (messageModal) messageModal.classList.remove('open');
+      } catch (e) {
+        console.error('Error sending message:', e);
+        messageErr.textContent = 'Failed to send messages';
+      }
+    });
+  }
+
  if (exportReportBtn) exportReportBtn.addEventListener('click', async () => {
     try {
     const ownersSnap = await get(ref(db, 'flatowners'));

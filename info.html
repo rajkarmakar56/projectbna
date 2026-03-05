@@ -66,6 +66,7 @@
   <div class="topbar">
     <h1>🏠 Flat Owners</h1>
     <button id="updateUserBtn" title="Update Owner" style="margin-left:8px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#90dbf4;color:#000;font-weight:700">Update Owner</button>
+    <button id="messageBtn" title="Common Message" style="padding:6px 12px;border-radius:8px;border:none;cursor:pointer;background:#fbbf24;color:#000;font-weight:700">💬 Message</button>
     <a class="back" id="logoutBtn" href="#" style="cursor:pointer">🔒</a>
   </div>
 
@@ -196,6 +197,21 @@
 
       <div style="margin-top:16px;text-align:right">
         <button id="closeHistory" style="padding:10px 20px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-weight:600">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="messageModal" class="modal">
+    <div class="modal-dialog">
+      <h3 style="margin-top:0;color:#222">💬 Common Message</h3>
+      <label><div class="small" style="font-weight:600;margin-bottom:6px">Message Text</div>
+        <textarea id="messageText" placeholder="Enter message to send to all residents" style="width:100%;padding:10px;margin-top:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:6px;font-family:Arial;min-height:120px;resize:vertical"></textarea>
+      </label>
+      <div class="err" id="messageErr" style="color:red;font-size:13px;margin-top:8px;margin-bottom:8px"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end">
+        <button id="cancelMessage" style="padding:10px 16px;border-radius:6px;border:1px solid #ddd;background:#fff">Cancel</button>
+        <button id="saveMessage" style="padding:10px 16px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-weight:600">Save</button>
+        <button id="sendMessage" style="padding:10px 16px;border-radius:6px;border:none;background:var(--green);color:#fff;font-weight:600">📤 Send All</button>
       </div>
     </div>
   </div>
