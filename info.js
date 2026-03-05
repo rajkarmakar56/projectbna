@@ -158,33 +158,31 @@ function initTopbar(){
         const ownersSnap = await get(ref(db, 'flatowners'));
         const owners = ownersSnap.val() || {};
         
-        let successCount = 0;
-        let failCount = 0;
-
+        const contactsList = [];
         for (const k in owners) {
           const owner = owners[k] || {};
           const contact = owner.contact || '';
-          
           if (contact) {
-            try {
-              // Create SMS link and trigger it
-              const smsEncoded = encodeURIComponent(text);
-              const smsLink = `sms:${contact}?body=${smsEncoded}`;
-              
-              // Open the SMS link in a new tab (will open device's SMS app)
-              window.open(smsLink, '_blank');
-              successCount++;
-            } catch (e) {
-              console.error(`Failed to send to ${owner.name}:`, e);
-              failCount++;
-            }
-          } else {
-            failCount++;
+            contactsList.push(contact);
           }
         }
 
-        alert(`Message sent to ${successCount} residents with valid contact numbers.\n${failCount} residents have no contact number.`);
+        if (contactsList.length === 0) {
+          messageErr.textContent = 'No residents with contact numbers found';
+          return;
+        }
+
+        // Combine all contacts with semicolon separator
+        const allContacts = contactsList.join(';');
+        const smsEncoded = encodeURIComponent(text);
+        const smsLink = `sms:${allContacts}?body=${smsEncoded}`;
+        
+        // Open single SMS window with all recipients
+        window.open(smsLink, '_blank');
+
+        alert(`Message opened for ${contactsList.length} residents.\nPlease send the message in your SMS app.`);
         if (messageModal) messageModal.classList.remove('open');
+
       } catch (e) {
         console.error('Error sending message:', e);
         messageErr.textContent = 'Failed to send messages';
